@@ -1,4 +1,3 @@
-// BookService.cs
 public class BookService : IBookService
 {
     private readonly AppDbContext _context;
@@ -8,7 +7,7 @@ public class BookService : IBookService
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         
-        // Сохраняем файл
+
         var uploadsDir = Path.Combine(_env.WebRootPath, "books");
         var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
         var filePath = Path.Combine(uploadsDir, fileName);
@@ -41,7 +40,6 @@ public class BookService : IBookService
         if (book.User.Username != username && !User.IsInRole("Admin")) 
             throw new Exception("Нет прав на удаление");
 
-        // Удаляем файл
         var filePath = Path.Combine(_env.WebRootPath, book.FilePath.TrimStart('/'));
         if (System.IO.File.Exists(filePath))
             System.IO.File.Delete(filePath);

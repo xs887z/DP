@@ -1,4 +1,6 @@
 [ApiController]
+[Authorize]
+[Route("api/books")]
 [Route("api/[controller]")]
 public class BooksController : ControllerBase
 {
@@ -25,11 +27,24 @@ public class BooksController : ControllerBase
         return Ok(books);
     }
 
-    [HttpPost("upload")]
+     [HttpPost("upload")]
+    public async Task<IActionResult> UploadBook(IFormFile file, [FromForm] string title, [FromForm] string author)
+    {
+        var book = await _bookService.UploadBookAsync(file, title, author, User.Identity.Name);
+        return Ok(book);
+    }
+
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UploadBook(IFormFile file)
     {
         var result = await _bookService.UploadBookAsync(file);
         return Ok(result);
+    }
+
+     [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteBook(int id)
+    {
+        await _bookService.DeleteBookAsync(id, User.Identity.Name);
+        return NoContent();
     }
 }
