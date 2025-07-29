@@ -2,6 +2,7 @@
 [Authorize]
 [Route("api/books")]
 [Route("api/[controller]")]
+[Route("api/books")] 
 public class BooksController : ControllerBase
 {
     private readonly IBookService _bookService;
@@ -15,10 +16,11 @@ public class BooksController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var books = await _bookService.GetAllBooksAsync();
         return Ok(books);
     }
-
+ 
 
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string genre)
@@ -27,24 +29,27 @@ public class BooksController : ControllerBase
         return Ok(books);
     }
 
-     [HttpPost("upload")]
+    [HttpPost("upload")]
     public async Task<IActionResult> UploadBook(IFormFile file, [FromForm] string title, [FromForm] string author)
     {
-        var book = await _bookService.UploadBookAsync(file, title, author, User.Identity.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var book = await _bookService.UploadBookAsync(file, title, author, userId);
         return Ok(book);
     }
 
+    [HttpPost("admin/upload")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UploadBook(IFormFile file)
+    public async Task<IActionResult> UploadBookAdmin(IFormFile file)
     {
         var result = await _bookService.UploadBookAsync(file);
         return Ok(result);
     }
 
-     [HttpDelete("{id}")]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteBook(int id)
     {
-        await _bookService.DeleteBookAsync(id, User.Identity.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        await _bookService.DeleteBookAsync(id, userId);
         return NoContent();
     }
 }
